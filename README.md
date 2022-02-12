@@ -14,8 +14,8 @@ func(next http.Handler) http.Handler
 
 ```go
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/mwblythe/midgin"
+  "github.com/gin-gonic/gin"
+  "github.com/mwblythe/midgin"
   "github.com/rs/cors"
 )
 
