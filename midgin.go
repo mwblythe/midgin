@@ -13,14 +13,21 @@ import (
 // r.Use(midgin.Adapt(middleware))
 func Adapt(middleware func(next http.Handler) http.Handler) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		stop := true
+
 		middleware(
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				// reset the context's Writer in case the middleware wrapped it
 				c.Writer = mkWriter(w, c.Writer)
 				c.Request = r
+				stop = false
 				c.Next()
 			}),
 		).ServeHTTP(c.Writer, c.Request)
+
+		if stop {
+			c.Abort()
+		}
 	}
 }
 

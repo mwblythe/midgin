@@ -70,6 +70,18 @@ func (s *MidginSuite) TestMiddleware3() {
 	s.Equal("win", w.Header().Get("X-Midgen3"))
 }
 
+func (s *MidginSuite) TestMiddlewareStop() {
+	router := s.Router(midgin.Adapt(middlewareStop))
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest("GET", "/ping", nil)
+	s.Nil(err)
+	router.ServeHTTP(w, r)
+
+	s.Equal(http.StatusUnauthorized, w.Code)
+	s.NotEqual("pong", w.Body.String())
+}
+
 // middleware1 sets a request context value
 func middleware1(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -89,6 +101,14 @@ func middleware2(next http.Handler) http.Handler {
 func middleware3(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(&fullWriter{w}, r)
+	})
+}
+
+// middlewareStop stops the chain by not calling next
+func middlewareStop(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status := http.StatusUnauthorized
+		http.Error(w, http.StatusText(status), status)
 	})
 }
 
