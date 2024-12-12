@@ -22,6 +22,7 @@ func Adapt(middleware func(next http.Handler) http.Handler) gin.HandlerFunc {
 				c.Request = r
 				stop = false
 				c.Next()
+				*r = *c.Request
 			}),
 		).ServeHTTP(c.Writer, c.Request)
 
